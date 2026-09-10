@@ -3,6 +3,8 @@
 Four-finger touchpad gestures that move windows across workspaces and smart-jump
 between occupied workspaces — wrapped in a single, tiny Omarchy IPC service.
 
+![preview](preview.jpg)
+
 > `nagualcode.touchflow` — Plugin ID
 > `omarchy-shell touchflow <cmd>` — IPC
 
@@ -30,33 +32,19 @@ Fine details:
 
 ## Installation
 
-1. Clone the repo into Omarchy's user plugin directory:
+## 📦 Installation
 
-   ```sh
-   git clone https://github.com/nagualcode/omarchy-touchflow.git \
-     ~/.config/omarchy/plugins/nagualcode.touchflow
-   ```
+omarchy plugin add https://github.com/nagualcode/omarchy-touchflow.git --enable
 
-2. Enable the plugin:
+omarchy restart shell
 
-   ```sh
-   omarchy-shell shell setPluginEnabled nagualcode.touchflow true
-   ```
+```sh
+omarchy restart shell
+```
 
-3. Restart the shell to pick it up (saving a file under `plugins/` also
-   triggers a hot-reload, but a restart is the safest way):
+## Removal
+omarchy plugin remove nagualcode.touchflow
 
-   ```sh
-   omarchy restart shell
-   ```
-
-4. Confirm it is alive:
-
-   ```sh
-   omarchy-shell touchflow state
-   ```
-
-   Something like `active=0 workspaces=1` means it is running.
 
 ## Wiring up `input.lua`
 
