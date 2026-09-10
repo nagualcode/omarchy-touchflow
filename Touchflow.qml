@@ -99,8 +99,8 @@ Item {
   }
 
   // ── fallbacks ────────────────────────────────────────────────────────
-  function openAppMenu() {
-    Quickshell.execDetached(["omarchy-shell", "shell", "toggle", "omarchy.menu", '{"menu":"root"}'])
+  function openBrowser() {
+    Quickshell.execDetached(["uwsm", "app", "--", "chromium"])
   }
 
   function openTerminal() {
@@ -109,13 +109,13 @@ Item {
 
   // ── gestures ─────────────────────────────────────────────────────────
   // Swipe up: relocate the active window.
-  //   no window / empty workspace  -> app menu
+  //   no window / empty workspace  -> browser
   //   many windows                 -> first empty workspace (or a fresh one)
   //   lone window                  -> next workspace, only if it is occupied
   function up() {
     var ws = root.activeWorkspace()
     var count = root.windowCount(ws)
-    if (!ws || count === 0) { root.openAppMenu(); return "menu" }
+    if (!ws || count === 0) { root.openBrowser(); return "browser" }
     if (count > 1) {
       var empty = root.firstEmptyWorkspace()
       if (empty !== null) { root.moveWindowTo(String(empty)); return "move:" + empty }
