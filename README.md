@@ -1,46 +1,72 @@
-# TouchFlow - 4 fingers magic.
+# TouchFlow
 
+Four-finger touchpad gestures that move windows across workspaces and smart-jump
+between occupied workspaces — wrapped in a single, tiny Omarchy IPC service.
 
-4 fingers touchpad gestures to move windows across workspaces and swtich worspaces.
+> `nagualcode.touchflow` — Plugin ID
+> `omarchy-shell touchflow <cmd>` — IPC
 
-## Instalação
+## What it does
 
-1. Clone o repo direto na pasta de plugins do Omarchy:
+Swipe with four fingers and TouchFlow decides what happens based on your live
+Hyprland workspace state — no old-style Lua + bash scripting, no round-tripping
+through `hyprctl | jq`. The gesture lives in Hyprland's `input.lua`; the
+decisions live in one QML service that reads the Hyprland object model directly.
+
+| Gesture | Empty workspace / no window | Multiple windows | Single window |
+| --- | --- | --- | --- |
+| **Up** | Opens the browser | Moves the active window to the first empty workspace (or a fresh one) | Moves to the next workspace, **only** if it is occupied |
+| **Down** | Opens the terminal (`foot`) | Moves the active window one workspace to the left | Same |
+| **Left** | — | Jumps to the next occupied workspace, skipping empty holes | Same, guaranteeing a fresh workspace right after the last used one |
+| **Right** | — | Same, in the opposite direction | Same |
+
+Fine details:
+
+- A lone-window **up** swipe only moves if the neighbor on the right is
+  occupied; if the neighbor is empty, nothing moves.
+- A **down** swipe from workspace 1 does nothing — there is no workspace 0.
+- **Side** swipes always skip empty holes, and a new workspace is minted right
+  after the last used one, ready for window drops.
+
+## Installation
+
+1. Clone the repo into Omarchy's user plugin directory:
 
    ```sh
    git clone https://github.com/nagualcode/omarchy-touchflow.git \
      ~/.config/omarchy/plugins/nagualcode.touchflow
    ```
 
-2. Habilite o plugin:
+2. Enable the plugin:
 
    ```sh
    omarchy-shell shell setPluginEnabled nagualcode.touchflow true
    ```
 
-3. Dê um sacode no shell pra ele acordar com o novo colega de quarto:
+3. Restart the shell to pick it up (saving a file under `plugins/` also
+   triggers a hot-reload, but a restart is the safest way):
 
    ```sh
-   pkill -x quickshell
+   omarchy restart shell
    ```
 
-   (o launcher do Omarchy vigia e reinicia sozinho, pode soltar.)
-
-4. Confirme que a coisa está viva:
+4. Confirm it is alive:
 
    ```sh
    omarchy-shell touchflow state
    ```
 
-   Se responder algo como `active=0 workspaces=1`, é sinal de vida.
+   Something like `active=0 workspaces=1` means it is running.
 
-## Colocando seu input.lua pra trabalhar
+## Wiring up `input.lua`
 
-Deleta o bloco inteiro de Lua (a `navigate_skipping_empty`, os quatro
-`hl.gesture` apontando pra scripts) e coloca só isto no lugar:
+The compositor owns the touchpad, so the *gesture itself* stays in Hyprland's
+`input.lua` (`~/.config/hypr/input.lua`). Delete any old four-finger Lua block
+(`navigate_skipping_empty`, the four `hl.gesture`s pointing at scripts) and
+replace it with this:
 
 ```lua
--- TouchFlow: o gesto só acorda o plugin; a decisão mora lá dentro.
+-- TouchFlow: the gesture just wakes the plugin; the decision lives inside.
 hl.gesture({
   fingers = 4,
   direction = "left",
@@ -66,38 +92,35 @@ hl.gesture({
 })
 ```
 
-Pronto: de dezenas de linhas de Lua + dois scripts pra quatro telefonemas.
+That's it: from dozens of Lua lines plus two scripts down to four gestures that
+phone the plugin.
 
-## O que cada gesto faz
+## IPC: works from anywhere
 
-| Gesto | Sem janela / ws vazio | Várias janelas | Uma janela sozinha |
-| --- | --- | --- | --- |
-| **Cima** | abre o browser | move a janela ativa pro 1º ws vazio (ou cria um novo) | move pro próximo ws, **somente** se ele estiver ocupado |
-| **Baixo** | abre o terminal (foot) | move a janela ativa um ws pra esquerda | idem |
-| **Esquerda** | — | pula pro próximo ws ocupado, ignorando buracos vazios | idem, garantindo um ws fresco logo após o último usado |
-| **Direita** | — | idem, pro lado contrário | idem |
-
-Detalhes finos:
-
-- Swipe pra **cima** com uma janela sozinha só move se o vizinho da direita
-  tiver gente; se o vizinho estiver vazio, ninguém se mexe (teletransporte
-  desnecessário é falta de educação).
-- Swipe pra **baixo** já no workspace 1 não faz nada — não existe esquerda do 1.
-- Swipe **lateral** sempre ignora os buracos: workspaces vazios são pulados e
-  um novo aparece logo depois do último usado, pronto pra receber coisa.
-
-## IPC: funciona de qualquer lugar
-
-Não precisa ser gesto — pode chamar de atalho, de bar, de script:
+You don't need a gesture — call TouchFlow from a keybinding, the bar, or a
+script:
 
 ```sh
-omarchy-shell touchflow up      # agir como swipe pra cima
-omarchy-shell touchflow down    # agir como swipe pra baixo
-omarchy-shell touchflow next    # pular pro próximo ws ocupado
-omarchy-shell touchflow prev    # pular pro anterior
-omarchy-shell touchflow state   # diagnóstico rápido
+omarchy-shell touchflow up      # act as an up swipe
+omarchy-shell touchflow down    # act as a down swipe
+omarchy-shell touchflow next    # jump to the next occupied workspace
+omarchy-shell touchflow prev    # jump to the previous one
+omarchy-shell touchflow state   # quick diagnostic
 ```
 
-## Licença
+## Dependencies
 
-MIT. Os dedos agradecem.
+- **Omarchy** (shell + `omarchy-shell` IPC)
+- **Hyprland** (gestures, Lua dispatcher)
+- A four-finger-trackpad-capable touchpad
+
+## Development
+
+The plugin source lives in `~/.config/omarchy/plugins/nagualcode.touchflow/`:
+
+- `Touchflow.qml` — the whole service (dispatch, fallbacks, IPC handler)
+- `manifest.json` — plugin metadata
+
+## License
+
+MIT — fingers not included.
