@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "touchflow",
+  "name": "TouchFlow",
+  "version": "1.0.0",
+  "author": "nagual",
+  "license": "MIT",
+  "description": "Four-finger touchpad gestures as one IPC plugin: move/maximize the active window, jump between occupied workspaces skipping empty holes, and fall back to the app menu or a terminal.",
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Touchflow.qml"
+  }
+}
