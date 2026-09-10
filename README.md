@@ -49,9 +49,7 @@ omarchy plugin remove nagualcode.touchflow
 ## Wiring up `input.lua`
 
 The compositor owns the touchpad, so the *gesture itself* stays in Hyprland's
-`input.lua` (`~/.config/hypr/input.lua`). Delete any old four-finger Lua block
-(`navigate_skipping_empty`, the four `hl.gesture`s pointing at scripts) and
-replace it with this:
+`input.lua` (`~/.config/hypr/input.lua`):
 
 ```lua
 -- TouchFlow: the gesture just wakes the plugin; the decision lives inside.
